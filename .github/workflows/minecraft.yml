@@ -30,7 +30,15 @@ jobs:
           cd minecraft
           echo "eula=true" > eula.txt
 
+      - name: Show installed files
+        run: |
+          echo "=== Minecraft server files ==="
+          ls -lah minecraft
+          echo "=== Forge libraries ==="
+          find minecraft/libraries -type f -name "*.jar" | head -30
+
       - name: Start Minecraft Server
         run: |
           cd minecraft
-          java -Xms2G -Xmx12G -jar forge-1.20.1-47.4.23-shim.jar nogui
+          chmod +x run.sh
+          ./run.sh nogui
