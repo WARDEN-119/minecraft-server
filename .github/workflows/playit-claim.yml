@@ -6,9 +6,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Download playit agent
+      - name: Download playit agent (legacy standalone version)
         run: |
-          wget https://github.com/playit-cloud/playit-agent/releases/latest/download/playit-linux-amd64 -O playit
+          wget https://github.com/playit-cloud/playit-agent/releases/download/v0.15.26/playit-linux-amd64 -O playit
           chmod +x ./playit
 
       - name: Run playit (watch this log for the claim link)
