@@ -11,12 +11,10 @@ jobs:
           wget https://github.com/playit-cloud/playit-agent/releases/download/v0.15.26/playit-linux-amd64 -O playit
           chmod +x ./playit
 
-      - name: Check network reachability to playit's servers
-        run: |
-          curl -v --max-time 10 https://api.playit.cloud || echo "COULD NOT REACH api.playit.cloud"
-          curl -v --max-time 10 https://control.ply.gg || echo "COULD NOT REACH control.ply.gg"
-
       - name: Run playit (watch this log for the claim link)
         env:
           RUST_LOG: debug
         run: timeout 90 stdbuf -oL -eL ./playit || echo "playit exited or timed out after 90s"
+
+      - name: Print the secret key
+        run: cat "$(./playit secret-path)"
