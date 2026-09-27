@@ -37,6 +37,18 @@ jobs:
           echo "=== Forge libraries ==="
           find minecraft/libraries -type f -name "*.jar" | head -30
 
+      - name: Download and start Playit tunnel agent
+        env:
+          SECRET_KEY: ${{ secrets.PLAYIT_SECRET_KEY }}
+        run: |
+          wget https://github.com/playit-cloud/playit-agent/releases/download/v0.15.26/playit-linux-amd64 -O playit
+          chmod +x ./playit
+          nohup ./playit > playit.log 2>&1 &
+          disown
+          sleep 5
+          echo "=== Playit agent log (first 5 seconds) ==="
+          cat playit.log
+
       - name: Start Minecraft Server
         run: |
           cd minecraft
