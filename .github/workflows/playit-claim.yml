@@ -1,20 +1,60 @@
 name: Playit Claim
-on: workflow_dispatch
+
+on:
+  workflow_dispatch:
 
 jobs:
   claim:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+
     steps:
       - name: Download playit agent (legacy standalone version)
         run: |
           wget https://github.com/playit-cloud/playit-agent/releases/download/v0.15.26/playit-linux-amd64 -O playit
           chmod +x ./playit
 
-      - name: Run playit (watch this log for the claim link)
-        env:
-          RUST_LOG: debug
-        run: timeout 90 stdbuf -oL -eL ./playit || echo "playit exited or timed out after 90s"
+      - name: Run playit and wait for claim
+        run: |
+          ./playit > playit.log 2>&1 &
+          PLAYIT_PID=$!
 
-      - name: Print the secret key
-        run: cat "$(./playit secret-path)"
+          echo "Playit agent started."
+
+          for i in $(seq 1 240); do
+            if grep -q "Visit link to setup" playit.log; then
+              echo "=============================="
+              grep "Visit link to setup" playit.log
+              echo "=============================="
+              break
+            fi
+            sleep 1
+          done
+
+          echo ""
+          echo "Keep the workflow running while you claim the agent."
+          echo ""
+
+          for i in $(seq 1 240); do
+            if [ -f "$HOME/.config/playit/gg/playit.toml" ]; then
+              echo "Playit configuration detected!"
+              kill "$PLAYIT_PID" 2>/dev/null || true
+              wait "$PLAYIT_PID" 2>/dev/null || true
+              exit 0
+            fi
+            sleep 1
+          done
+
+          echo "Claim was not completed within the allowed time."
+          kill "$PLAYIT_PID" 2>/dev/null || true
+          exit 1
+
+      - name: Check secret file
+        run: |
+          if [ -f "$HOME/.config/playit/gg/playit.toml" ]; then
+            echo "SUCCESS: Playit agent was claimed."
+            echo "Secret file exists."
+          else
+            echo "ERROR: Playit secret file was not created."
+            exit 1
+          fi
