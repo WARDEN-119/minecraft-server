@@ -36,7 +36,7 @@ jobs:
           echo ""
 
           for i in $(seq 1 240); do
-            if [ -f "$HOME/.config/playit/gg/playit.toml" ]; then
+            if [ -f "$HOME/.config/playit_gg/playit.toml" ]; then
               echo "Playit configuration detected!"
               kill "$PLAYIT_PID" 2>/dev/null || true
               wait "$PLAYIT_PID" 2>/dev/null || true
@@ -49,12 +49,5 @@ jobs:
           kill "$PLAYIT_PID" 2>/dev/null || true
           exit 1
 
-      - name: Check secret file
-        run: |
-          if [ -f "$HOME/.config/playit/gg/playit.toml" ]; then
-            echo "SUCCESS: Playit agent was claimed."
-            echo "Secret file exists."
-          else
-            echo "ERROR: Playit secret file was not created."
-            exit 1
-          fi
+      - name: Print the secret key
+        run: cat "$HOME/.config/playit_gg/playit.toml"
